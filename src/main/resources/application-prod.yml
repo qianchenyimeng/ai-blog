@@ -1,0 +1,212 @@
+# 生产环境配置
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+  http2:
+    enabled: true
+  error:
+    whitelabel:
+      enabled: false
+
+spring:
+  profiles:
+    active: prod
+  
+  # 数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/personal_blog?useUnicode=true&characterEncoding=utf8&useSSL=true&serverTimezone=Asia/Shanghai
+    username: ${DB_USERNAME:blog_user}
+    password: ${DB_PASSWORD:blog_password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+      leak-detection-threshold: 60000
+      pool-name: BlogHikariCP
+      connection-test-query: SELECT 1
+
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: false
+        use_sql_comments: false
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+    open-in-view: false
+
+  # 缓存配置
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=300s
+
+  # 会话配置
+  session:
+    timeout: 30m
+    cookie:
+      max-age: 1800
+      http-only: true
+      secure: true
+      same-site: strict
+
+  # 安全配置
+  security:
+    require-ssl: true
+
+  # Thymeleaf配置
+  thymeleaf:
+    cache: true
+    check-template: false
+    check-template-location: false
+    enable-spring-el-compiler: true
+    encoding: UTF-8
+    mode: HTML
+    prefix: classpath:/templates/
+    suffix: .html
+
+  # 静态资源配置
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          max-age: 365d
+          cache-public: true
+      chain:
+        compressed: true
+        cache: true
+
+  # 邮件配置（如果需要）
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: ${MAIL_HOST:smtp.gmail.com}
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.blog: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/blog-app.log
+    max-size: 100MB
+    max-history: 30
+    total-size-cap: 1GB
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+    metrics:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+      sla:
+        http.server.requests: 100ms, 500ms, 1s
+
+# 应用信息
+info:
+  app:
+    name: Personal Blog System
+    description: 个人博客系统
+    version: 1.0.0
+    encoding: UTF-8
+    java:
+      version: 1.8
+
+# 自定义配置
+blog:
+  # 文件上传配置
+  upload:
+    path: ${UPLOAD_PATH:/var/blog/uploads}
+    max-file-size: 10MB
+    allowed-types: jpg,jpeg,png,gif,pdf,doc,docx
+  
+  # 分页配置
+  pagination:
+    default-page-size: 10
+    max-page-size: 100
+  
+  # 缓存配置
+  cache:
+    blog-list-ttl: 300
+    user-profile-ttl: 600
+    tag-cloud-ttl: 1800
+  
+  # 安全配置
+  security:
+    password-strength: medium
+    session-timeout: 1800
+    max-login-attempts: 5
+    lockout-duration: 900
+  
+  # 邮件通知配置
+  notification:
+    enabled: ${NOTIFICATION_ENABLED:false}
+    from-email: ${NOTIFICATION_FROM:noreply@blog.com}
+    admin-email: ${ADMIN_EMAIL:admin@blog.com}
+  
+  # 搜索配置
+  search:
+    max-results: 100
+    highlight-enabled: true
+  
+  # 评论配置
+  comment:
+    moderation-enabled: false
+    max-length: 1000
+    rate-limit: 10 # 每分钟最多评论数
+  
+  # 博客配置
+  blog-post:
+    max-title-length: 200
+    max-content-length: 50000
+    auto-save-interval: 30 # 秒

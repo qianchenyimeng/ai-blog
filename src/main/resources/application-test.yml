@@ -1,0 +1,119 @@
+# 测试环境配置
+server:
+  port: 0 # 随机端口
+
+spring:
+  profiles:
+    active: test
+  
+  # 数据源配置 - 使用H2内存数据库
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: false
+        use_sql_comments: false
+    open-in-view: false
+
+  # H2控制台配置
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # 缓存配置
+  cache:
+    type: simple
+
+  # 会话配置
+  session:
+    timeout: 30m
+    cookie:
+      http-only: true
+      secure: false
+
+  # Thymeleaf配置
+  thymeleaf:
+    cache: false
+    check-template: true
+    check-template-location: true
+
+  # 邮件配置 - 测试环境不发送真实邮件
+  mail:
+    host: localhost
+    port: 25
+    username: test
+    password: test
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.blog: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+# 自定义配置
+blog:
+  upload:
+    path: /tmp/test-uploads
+    max-file-size: 1MB
+    allowed-types: jpg,png
+  
+  pagination:
+    default-page-size: 5
+    max-page-size: 20
+  
+  cache:
+    blog-list-ttl: 10
+    user-profile-ttl: 10
+    tag-cloud-ttl: 10
+  
+  security:
+    password-strength: low
+    session-timeout: 300
+    max-login-attempts: 10
+    lockout-duration: 60
+  
+  notification:
+    enabled: false
+  
+  search:
+    max-results: 20
+  
+  comment:
+    moderation-enabled: false
+    max-length: 500
+    rate-limit: 100
+  
+  blog-post:
+    max-title-length: 100
+    max-content-length: 10000
+    auto-save-interval: 5

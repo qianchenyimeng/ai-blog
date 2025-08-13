@@ -1,0 +1,139 @@
+# 开发环境配置
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: dev
+  
+  # 数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/personal_blog_dev?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        use_sql_comments: true
+    open-in-view: false
+
+  # 缓存配置
+  cache:
+    type: simple
+
+  # 会话配置
+  session:
+    timeout: 60m
+    cookie:
+      http-only: true
+      secure: false
+
+  # 安全配置
+  security:
+    require-ssl: false
+
+  # Thymeleaf配置
+  thymeleaf:
+    cache: false
+    check-template: true
+    check-template-location: true
+
+  # 静态资源配置
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          max-age: 0
+      chain:
+        cache: false
+
+  # 开发工具配置
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+    livereload:
+      enabled: true
+
+  # 邮件配置 - 开发环境使用本地SMTP
+  mail:
+    host: localhost
+    port: 1025
+    username: 
+    password: 
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.blog: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/blog-dev.log
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+# 自定义配置
+blog:
+  upload:
+    path: uploads
+    max-file-size: 10MB
+    allowed-types: jpg,jpeg,png,gif,pdf,doc,docx
+  
+  pagination:
+    default-page-size: 5
+    max-page-size: 50
+  
+  cache:
+    blog-list-ttl: 60
+    user-profile-ttl: 120
+    tag-cloud-ttl: 300
+  
+  security:
+    password-strength: low
+    session-timeout: 3600
+    max-login-attempts: 10
+    lockout-duration: 300
+  
+  notification:
+    enabled: true
+    from-email: dev@blog.com
+    admin-email: admin@blog.com
+  
+  search:
+    max-results: 50
+    highlight-enabled: true
+  
+  comment:
+    moderation-enabled: false
+    max-length: 1000
+    rate-limit: 50
+  
+  blog-post:
+    max-title-length: 200
+    max-content-length: 50000
+    auto-save-interval: 10

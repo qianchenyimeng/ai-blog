@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::head-content}, ~{::main-content})}">
+
+<head>
+    <title>我的博客 - 个人博客系统</title>
+    
+    <th:block th:fragment="head-content">
+        <style>
+            .blog-card {
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+            .blog-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            .status-badge {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+            }
+            .blog-stats {
+                font-size: 0.875rem;
+            }
+        </style>
+    </th:block>
+</head>
+
+<div th:fragment="main-content">
+    <!-- 页面标题和统计 -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <h2>
+                            <i class="fas fa-list me-2"></i>我的博客
+                        </h2>
+                        <p class="text-muted">管理您发布的所有博客文章</p>
+                    </div>
+            <div class="col-md-4 text-end">
+                <div class="card bg-primary text-white">
+                    <div class="card-body py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-0" th:text="${totalElements}">0</h4>
+                                <small>篇博客</small>
+                            </div>
+                            <i class="fas fa-file-alt fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- 操作栏 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <a th:href="@{/blog/create}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>写新博客
+                </a>
+            </div>
+            <div class="col-md-6 text-end">
+                <!-- 搜索和筛选（后续可扩展） -->
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fas fa-filter me-1"></i>筛选
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">全部博客</a></li>
+                        <li><a class="dropdown-item" href="#">已发布</a></li>
+                        <li><a class="dropdown-item" href="#">草稿</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 博客列表 -->
+        <div th:if="${blogPage != null and blogPage.hasContent()}">
+            <div class="row">
+                <div class="col-md-6 col-lg-4 mb-4" th:each="blog : ${blogPage.content}">
+                    <div class="card blog-card h-100 position-relative">
+                        <!-- 发布状态标识 -->
+                        <span class="badge status-badge" 
+                              th:classappend="${blog.published} ? 'bg-success' : 'bg-warning'"
+                              th:text="${blog.published} ? '已发布' : '草稿'">状态</span>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <!-- 博客标题 -->
+                            <h5 class="card-title mb-2">
+                                <a th:href="@{'/blog/' + ${blog.id}}" 
+                                   class="text-decoration-none text-dark"
+                                   th:text="${blog.title}">博客标题</a>
+                            </h5>
+                            
+                            <!-- 博客摘要 -->
+                            <p class="card-text text-muted flex-grow-1" 
+                               th:text="${#strings.abbreviate(blog.autoSummary, 100)}">博客摘要...</p>
+                            
+                            <!-- 标签 -->
+                            <div class="mb-3" th:if="${blog.tags != null and !#strings.isEmpty(blog.tags)}">
+                                <span th:each="tag : ${#strings.arraySplit(blog.tags, ',')}" 
+                                      class="badge bg-secondary me-1"
+                                      th:text="${#strings.trim(tag)}">标签</span>
+                            </div>
+                            
+                            <!-- 博客统计 -->
+                            <div class="blog-stats text-muted mb-3">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <i class="fas fa-eye"></i>
+                                        <div th:text="${blog.viewCount}">0</div>
+                                        <small>浏览</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="fas fa-comments"></i>
+                                        <div th:text="${blog.commentCount}">0</div>
+                                        <small>评论</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="fas fa-calendar"></i>
+                                        <div th:text="${#temporals.format(blog.createdAt, 'MM-dd')}">日期</div>
+                                        <small>发布</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 操作按钮 -->
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <a th:href="@{'/blog/' + ${blog.id}}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>查看
+                                    </a>
+                                    <a th:href="@{'/blog/' + ${blog.id} + '/edit'}" 
+                                       class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-edit me-1"></i>编辑
+                                    </a>
+                                    <a th:href="@{'/blog/' + ${blog.id} + '/comments/manage'}" 
+                                       class="btn btn-outline-info btn-sm"
+                                       th:if="${blog.commentCount > 0}">
+                                        <i class="fas fa-comments me-1"></i>评论
+                                    </a>
+                                </div>
+                                <button type="button" 
+                                        class="btn btn-outline-danger btn-sm" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteModal"
+                                        th:data-blog-id="${blog.id}"
+                                        th:data-blog-title="${blog.title}">
+                                    <i class="fas fa-trash me-1"></i>删除
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 更新时间 -->
+                        <div class="card-footer text-muted small">
+                            <i class="fas fa-clock me-1"></i>
+                            更新于 <span th:text="${#temporals.format(blog.updatedAt, 'yyyy-MM-dd HH:mm')}">时间</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分页导航 -->
+            <nav th:if="${totalPages > 1}" aria-label="博客分页" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <!-- 上一页 -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/my-blogs(page=${currentPage - 1})}"
+                           th:if="${currentPage > 0}">
+                            <i class="fas fa-chevron-left"></i> 上一页
+                        </a>
+                        <span class="page-link" th:if="${currentPage == 0}">
+                            <i class="fas fa-chevron-left"></i> 上一页
+                        </span>
+                    </li>
+                    
+                    <!-- 页码 -->
+                    <li class="page-item" 
+                        th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:if="${pageNum >= currentPage - 2 and pageNum <= currentPage + 2}"
+                        th:classappend="${pageNum == currentPage} ? 'active'">
+                        <a class="page-link" 
+                           th:href="@{/my-blogs(page=${pageNum})}"
+                           th:text="${pageNum + 1}">1</a>
+                    </li>
+                    
+                    <!-- 下一页 -->
+                    <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/my-blogs(page=${currentPage + 1})}"
+                           th:if="${currentPage < totalPages - 1}">
+                            下一页 <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <span class="page-link" th:if="${currentPage >= totalPages - 1}">
+                            下一页 <i class="fas fa-chevron-right"></i>
+                        </span>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- 无博客内容提示 -->
+        <div th:if="${blogPage == null or !blogPage.hasContent()}" class="text-center py-5">
+            <i class="fas fa-file-alt fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted mb-3">还没有博客</h4>
+            <p class="text-muted mb-4">开始您的创作之旅，分享您的想法和经验</p>
+            <a th:href="@{/blog/create}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>写第一篇博客
+            </a>
+        </div>
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-danger me-2"></i>确认删除
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>您确定要删除博客《<span id="deleteBlogTitle"></span>》吗？</p>
+                    <p class="text-muted">此操作不可撤销，博客及其所有评论都将被永久删除。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <form id="deleteForm" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>确认删除
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 删除博客模态框处理
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteModal = document.getElementById('deleteModal');
+            const deleteForm = document.getElementById('deleteForm');
+            const deleteBlogTitle = document.getElementById('deleteBlogTitle');
+            
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const blogId = button.getAttribute('data-blog-id');
+                const blogTitle = button.getAttribute('data-blog-title');
+                
+                deleteBlogTitle.textContent = blogTitle;
+                deleteForm.action = '/blog/' + blogId + '/delete';
+            });
+        });
+
+        // 卡片悬停效果
+        document.querySelectorAll('.blog-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+
+</div>

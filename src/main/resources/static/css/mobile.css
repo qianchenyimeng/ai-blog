@@ -1,0 +1,373 @@
+/* 移动端优化样式 */
+
+/* 超小屏幕 (手机, 小于576px) */
+@media (max-width: 575.98px) {
+    /* 导航栏优化 */
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .navbar-collapse {
+        margin-top: 0.5rem;
+        background-color: rgba(0,123,255,0.95);
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    /* 容器优化 */
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    /* 卡片优化 */
+    .card {
+        margin-bottom: 1rem;
+        border-radius: 0.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+    }
+    
+    /* 按钮优化 */
+    .btn {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .btn-sm {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.75rem;
+    }
+    
+    .btn-lg {
+        font-size: 1rem;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    /* 表单优化 */
+    .form-control {
+        font-size: 16px; /* 防止iOS缩放 */
+        padding: 0.75rem;
+    }
+    
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    /* 博客卡片优化 */
+    .blog-card .card-body {
+        padding: 0.75rem;
+    }
+    
+    .blog-title {
+        font-size: 1.1rem;
+        line-height: 1.3;
+    }
+    
+    .blog-meta {
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
+    
+    /* 评论优化 */
+    .comment-item {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+    }
+    
+    .comment-content {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    /* 分页优化 */
+    .pagination {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .pagination .page-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+        margin: 0.125rem;
+    }
+    
+    /* 模态框优化 */
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .modal-content {
+        border-radius: 0.5rem;
+    }
+    
+    .modal-header {
+        padding: 1rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-footer {
+        padding: 0.75rem 1rem;
+    }
+    
+    /* 搜索框优化 */
+    .search-box .form-control {
+        font-size: 16px;
+        padding: 0.75rem 3rem 0.75rem 1rem;
+    }
+    
+    /* 标签云优化 */
+    .tag-item {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+        margin: 0.125rem;
+    }
+    
+    /* 页脚优化 */
+    .footer {
+        padding: 1.5rem 0;
+        text-align: center;
+    }
+    
+    .footer .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    /* 工具栏优化 */
+    .btn-group-vertical .btn {
+        margin-bottom: 0.25rem;
+    }
+    
+    /* 表格优化 */
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    /* 警告框优化 */
+    .alert {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    /* 面包屑优化 */
+    .breadcrumb {
+        font-size: 0.85rem;
+        padding: 0.5rem 0;
+    }
+}
+
+/* 小屏幕 (平板, 576px 到 767.98px) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .card-columns {
+        column-count: 2;
+    }
+    
+    .blog-card .row {
+        flex-direction: column;
+    }
+    
+    .blog-card .col-md-3 {
+        margin-top: 1rem;
+        text-align: left;
+    }
+}
+
+/* 中等屏幕 (平板, 768px 到 991.98px) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .card-columns {
+        column-count: 2;
+        column-gap: 1.5rem;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+    /* 增大可点击区域 */
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .nav-link {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .pagination .page-link {
+        min-height: 44px;
+        min-width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* 移除悬停效果 */
+    .card:hover {
+        transform: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .btn:hover {
+        transform: none;
+    }
+    
+    .tag-item:hover {
+        transform: none;
+    }
+}
+
+/* 横屏手机优化 */
+@media (max-height: 500px) and (orientation: landscape) {
+    .main-content {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+    
+    .modal-dialog {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .navbar {
+        min-height: auto;
+    }
+    
+    .navbar-brand {
+        font-size: 1rem;
+    }
+}
+
+/* 高分辨率屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .card {
+        box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+    
+    .btn {
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .alert {
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+}
+
+/* 打印样式 */
+@media print {
+    .navbar,
+    .footer,
+    .btn,
+    .alert,
+    .modal,
+    .pagination {
+        display: none !important;
+    }
+    
+    .main-content {
+        padding: 0;
+    }
+    
+    .card {
+        border: 1px solid #ddd;
+        box-shadow: none;
+        break-inside: avoid;
+    }
+    
+    .blog-content {
+        font-size: 12pt;
+        line-height: 1.5;
+    }
+    
+    a {
+        text-decoration: none;
+        color: #000;
+    }
+    
+    a[href]:after {
+        content: " (" attr(href) ")";
+        font-size: 10pt;
+        color: #666;
+    }
+}
+
+/* 无障碍优化 */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .fade-in,
+    .slide-in {
+        animation: none;
+    }
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid #000;
+    }
+    
+    .btn {
+        border: 2px solid;
+    }
+    
+    .form-control {
+        border: 2px solid #000;
+    }
+    
+    .alert {
+        border: 2px solid;
+    }
+}
+
+/* 深色模式移动端优化 */
+@media (prefers-color-scheme: dark) and (max-width: 575.98px) {
+    .navbar-collapse {
+        background-color: rgba(52, 58, 64, 0.95);
+    }
+    
+    .card {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+    }
+    
+    .form-control {
+        background-color: #2d2d2d;
+        border-color: #495057;
+        color: #e0e0e0;
+    }
+    
+    .modal-content {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+    }
+}

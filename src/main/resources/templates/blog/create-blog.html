@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::head-content}, ~{::main-content})}">
+
+<head>
+    <title th:text="${isEdit ? '编辑博客' : '创建博客'} + ' - 个人博客系统'">创建博客 - 个人博客系统</title>
+    
+    <th:block th:fragment="head-content">
+        <style>
+            .content-editor {
+                min-height: 400px;
+            }
+            .tag-input {
+                border: 1px solid #ced4da;
+                border-radius: 0.375rem;
+                padding: 0.375rem 0.75rem;
+                min-height: 38px;
+            }
+            .tag-item {
+                display: inline-block;
+                background-color: #007bff;
+                color: white;
+                padding: 0.25rem 0.5rem;
+                margin: 0.125rem;
+                border-radius: 0.25rem;
+                font-size: 0.875rem;
+            }
+            .tag-item .remove-tag {
+                margin-left: 0.5rem;
+                cursor: pointer;
+            }
+        </style>
+    </th:block>
+</head>
+
+<div th:fragment="main-content">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- 页面标题 -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>
+                        <i th:class="${isEdit ? 'fas fa-edit' : 'fas fa-plus'} + ' me-2'"></i>
+                        <span th:text="${isEdit ? '编辑博客' : '创建博客'}">创建博客</span>
+                    </h2>
+                    <span class="text-muted">
+                        作者：<span sec:authentication="name"></span>
+                    </span>
+                </div>
+
+
+
+                <!-- 博客表单 -->
+                <div class="card">
+                    <div class="card-body">
+                        <form th:action="${isEdit ? '/blog/' + blogDto.id + '/edit' : '/blog/create'}" 
+                              th:object="${blogDto}" 
+                              method="post">
+                            
+                            <!-- 标题 -->
+                            <div class="mb-3">
+                                <label for="title" class="form-label">
+                                    <i class="fas fa-heading me-1"></i>博客标题 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="title" 
+                                       th:field="*{title}"
+                                       th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''"
+                                       placeholder="请输入博客标题">
+                                <div th:if="${#fields.hasErrors('title')}" class="invalid-feedback">
+                                    <span th:errors="*{title}"></span>
+                                </div>
+                            </div>
+
+                            <!-- 摘要 -->
+                            <div class="mb-3">
+                                <label for="summary" class="form-label">
+                                    <i class="fas fa-file-alt me-1"></i>博客摘要
+                                </label>
+                                <textarea class="form-control" 
+                                          id="summary" 
+                                          th:field="*{summary}"
+                                          th:classappend="${#fields.hasErrors('summary')} ? 'is-invalid' : ''"
+                                          rows="3"
+                                          placeholder="请输入博客摘要（可选，不填写将自动生成）"></textarea>
+                                <div th:if="${#fields.hasErrors('summary')}" class="invalid-feedback">
+                                    <span th:errors="*{summary}"></span>
+                                </div>
+                                <div class="form-text">摘要将在博客列表中显示，建议控制在200字以内</div>
+                            </div>
+
+                            <!-- 标签 -->
+                            <div class="mb-3">
+                                <label for="tags" class="form-label">
+                                    <i class="fas fa-tags me-1"></i>标签
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="tags" 
+                                       th:field="*{tags}"
+                                       placeholder="请输入标签，用逗号分隔（如：技术,生活,随笔）">
+                                <div class="form-text">标签有助于读者找到相关内容，建议添加3-5个标签</div>
+                            </div>
+
+                            <!-- 内容 -->
+                            <div class="mb-3">
+                                <label for="content" class="form-label">
+                                    <i class="fas fa-edit me-1"></i>博客内容 <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control content-editor" 
+                                          id="content" 
+                                          th:field="*{content}"
+                                          th:classappend="${#fields.hasErrors('content')} ? 'is-invalid' : ''"
+                                          placeholder="请输入博客内容..."></textarea>
+                                <div th:if="${#fields.hasErrors('content')}" class="invalid-feedback">
+                                    <span th:errors="*{content}"></span>
+                                </div>
+                            </div>
+
+                            <!-- 发布状态 -->
+                            <div class="mb-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           id="published" 
+                                           th:field="*{published}"
+                                           checked>
+                                    <label class="form-check-label" for="published">
+                                        <i class="fas fa-eye me-1"></i>立即发布
+                                    </label>
+                                </div>
+                                <div class="form-text">取消勾选将保存为草稿，只有您可以查看</div>
+                            </div>
+
+                            <!-- 操作按钮 -->
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <button type="submit" class="btn btn-primary btn-lg me-3">
+                                        <i th:class="${isEdit ? 'fas fa-save' : 'fas fa-plus'} + ' me-2'"></i>
+                                        <span th:text="${isEdit ? '保存修改' : '发布博客'}">发布博客</span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-lg" onclick="history.back()">
+                                        <i class="fas fa-arrow-left me-2"></i>返回
+                                    </button>
+                                </div>
+                                <div th:if="${isEdit}">
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                        <i class="fas fa-trash me-2"></i>删除博客
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div th:if="${isEdit}" class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-danger me-2"></i>确认删除
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>您确定要删除这篇博客吗？</p>
+                    <p class="text-muted">此操作不可撤销，博客及其所有评论都将被永久删除。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <form th:action="@{'/blog/' + ${blogDto.id} + '/delete'}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>确认删除
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 自动调整文本域高度
+        document.addEventListener('DOMContentLoaded', function() {
+            const contentTextarea = document.getElementById('content');
+            
+            function adjustHeight() {
+                contentTextarea.style.height = 'auto';
+                contentTextarea.style.height = contentTextarea.scrollHeight + 'px';
+            }
+            
+            contentTextarea.addEventListener('input', adjustHeight);
+            adjustHeight(); // 初始调整
+            
+            // 字数统计
+            const titleInput = document.getElementById('title');
+            const summaryTextarea = document.getElementById('summary');
+            
+            function updateCharCount(element, maxLength) {
+                const currentLength = element.value.length;
+                const countElement = element.parentNode.querySelector('.char-count');
+                if (countElement) {
+                    countElement.textContent = `${currentLength}/${maxLength}`;
+                    if (currentLength > maxLength * 0.9) {
+                        countElement.classList.add('text-warning');
+                    } else {
+                        countElement.classList.remove('text-warning');
+                    }
+                }
+            }
+            
+            // 添加字数统计显示
+            if (titleInput) {
+                const titleHelp = titleInput.parentNode.querySelector('.form-text');
+                if (titleHelp) {
+                    titleHelp.innerHTML += ' <span class="char-count float-end">0/200</span>';
+                }
+                titleInput.addEventListener('input', () => updateCharCount(titleInput, 200));
+                updateCharCount(titleInput, 200);
+            }
+            
+            if (summaryTextarea) {
+                const summaryHelp = summaryTextarea.parentNode.querySelector('.form-text');
+                if (summaryHelp) {
+                    summaryHelp.innerHTML += ' <span class="char-count float-end">0/500</span>';
+                }
+                summaryTextarea.addEventListener('input', () => updateCharCount(summaryTextarea, 500));
+                updateCharCount(summaryTextarea, 500);
+            }
+        });
+    </script>
+
+</div>

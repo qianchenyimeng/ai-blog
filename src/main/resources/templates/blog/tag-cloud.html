@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::head-content}, ~{::main-content})}">
+<head>
+    <title>标签云 - 个人博客系统</title>
+    
+    <th:block th:fragment="head-content">
+        <style>
+            .tag-cloud-header {
+                background: linear-gradient(135deg, #28a745, #20c997);
+                color: white;
+                padding: 3rem 0;
+                margin: -2rem -15px 2rem -15px;
+            }
+            .tag-item {
+                display: inline-block;
+                margin: 0.25rem;
+                padding: 0.5rem 1rem;
+                border-radius: 2rem;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-weight: 500;
+            }
+            .tag-size-1 { font-size: 0.8rem; background-color: #e9ecef; color: #495057; }
+            .tag-size-2 { font-size: 0.9rem; background-color: #dee2e6; color: #495057; }
+            .tag-size-3 { font-size: 1rem; background-color: #ced4da; color: #495057; }
+            .tag-size-4 { font-size: 1.1rem; background-color: #adb5bd; color: #fff; }
+            .tag-size-5 { font-size: 1.2rem; background-color: #6c757d; color: #fff; }
+            .tag-size-6 { font-size: 1.3rem; background-color: #495057; color: #fff; }
+            
+            .tag-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                color: #fff !important;
+                background-color: #007bff !important;
+            }
+            
+            .popular-tag {
+                background: linear-gradient(45deg, #007bff, #0056b3);
+                color: white;
+                border: none;
+            }
+            
+            .popular-tag:hover {
+                background: linear-gradient(45deg, #0056b3, #004085);
+                color: white;
+            }
+            
+            .stats-card {
+                background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+                border: none;
+                border-radius: 1rem;
+            }
+            
+            .tag-search {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <main th:fragment="main-content">
+
+
+
+    <div class="container-fluid px-0">
+        <!-- 标签云头部 -->
+        <div class="tag-cloud-header">
+            <div class="container">
+                <div class="text-center">
+                    <h1 class="display-4 mb-3">
+                        <i class="fas fa-tags me-3"></i>标签云
+                    </h1>
+                    <p class="lead mb-4">通过标签发现感兴趣的内容</p>
+                    
+                    <!-- 标签搜索 -->
+                    <div class="tag-search">
+                        <div class="input-group">
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   id="tagSearch"
+                                   placeholder="搜索标签..."
+                                   autocomplete="off">
+                            <button class="btn btn-light btn-lg" type="button" onclick="searchTag()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 统计信息 -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card stats-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-tags fa-2x text-primary mb-3"></i>
+                        <h3 class="mb-1" th:text="${totalTags}">0</h3>
+                        <p class="text-muted mb-0">总标签数</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card stats-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-fire fa-2x text-danger mb-3"></i>
+                        <h3 class="mb-1" th:text="${usedTags}">0</h3>
+                        <p class="text-muted mb-0">活跃标签</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card stats-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-star fa-2x text-warning mb-3"></i>
+                        <h3 class="mb-1" th:text="${#lists.size(popularTags)}">0</h3>
+                        <p class="text-muted mb-0">热门标签</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 热门标签 -->
+        <div class="card shadow-sm mb-4" th:if="${popularTags != null and !popularTags.isEmpty()}">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-fire me-2 text-danger"></i>热门标签
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center">
+                    <a th:each="tag : ${popularTags}" 
+                       th:href="@{'/search?tag=' + ${tag.name}}" 
+                       class="tag-item popular-tag"
+                       th:text="${tag.name}">标签</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 所有标签云 -->
+        <div class="card shadow-sm" th:if="${allTags != null and !allTags.isEmpty()}">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-cloud me-2 text-info"></i>所有标签
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center" id="tagCloud">
+                    <a th:each="tag : ${allTags}" 
+                       th:href="@{'/search?tag=' + ${tag.name}}" 
+                       class="tag-item tag-size-3"
+                       th:text="${tag.name}"
+                       th:data-tag-name="${tag.name}">标签</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 无标签提示 -->
+        <div th:if="${allTags == null or allTags.isEmpty()}" class="text-center py-5">
+            <i class="fas fa-tags fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted mb-3">还没有标签</h4>
+            <p class="text-muted mb-4">标签会在发布博客时自动创建</p>
+            <div sec:authorize="isAuthenticated()">
+                <a th:href="@{/blog/create}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>写第一篇博客
+                </a>
+            </div>
+            <div sec:authorize="!isAuthenticated()">
+                <a th:href="@{/register}" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>注册并开始写作
+                </a>
+            </div>
+        </div>
+    </div>
+
+        <script>
+            // 标签搜索功能
+            function searchTag() {
+                const searchInput = document.getElementById('tagSearch');
+                const keyword = searchInput.value.trim();
+                if (keyword) {
+                    window.location.href = '/search?q=' + encodeURIComponent(keyword);
+                }
+            }
+
+            // 回车搜索
+            document.getElementById('tagSearch').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchTag();
+                }
+            });
+
+            // 标签云实时搜索过滤
+            document.getElementById('tagSearch').addEventListener('input', function(e) {
+                const keyword = e.target.value.toLowerCase();
+                const tags = document.querySelectorAll('#tagCloud .tag-item');
+                
+                tags.forEach(tag => {
+                    const tagName = tag.getAttribute('data-tag-name').toLowerCase();
+                    if (tagName.includes(keyword)) {
+                        tag.style.display = 'inline-block';
+                    } else {
+                        tag.style.display = 'none';
+                    }
+                });
+            });
+
+            // 随机标签大小（模拟使用频率）
+            document.addEventListener('DOMContentLoaded', function() {
+                const tags = document.querySelectorAll('#tagCloud .tag-item');
+                tags.forEach(tag => {
+                    const randomSize = Math.floor(Math.random() * 6) + 1;
+                    tag.className = tag.className.replace(/tag-size-\d/, 'tag-size-' + randomSize);
+                });
+            });
+        </script>
+    </main>
+</body>
+</html>

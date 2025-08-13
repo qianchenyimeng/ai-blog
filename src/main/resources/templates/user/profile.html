@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::head-content}, ~{::main-content})}">
+
+<head>
+    <title>个人资料 - 个人博客系统</title>
+</head>
+
+<div th:fragment="main-content">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- 页面标题 -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>
+                        <i class="fas fa-user-cog me-2"></i>个人资料管理
+                    </h2>
+                    <span class="text-muted">
+                        欢迎，<span sec:authentication="name"></span>
+                    </span>
+                </div>
+
+
+
+                <!-- 个人资料卡片 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-id-card me-2"></i>基本信息
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/profile}" th:object="${userProfile}" method="post">
+                            <div class="row">
+                                <!-- 用户名 -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="username" class="form-label">
+                                        <i class="fas fa-user me-1"></i>用户名 <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="username" 
+                                           th:field="*{username}"
+                                           th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
+                                           placeholder="请输入用户名">
+                                    <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback">
+                                        <span th:errors="*{username}"></span>
+                                    </div>
+                                </div>
+
+                                <!-- 邮箱 -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">
+                                        <i class="fas fa-envelope me-1"></i>邮箱 <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="email" 
+                                           class="form-control" 
+                                           id="email" 
+                                           th:field="*{email}"
+                                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                           placeholder="请输入邮箱地址">
+                                    <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback">
+                                        <span th:errors="*{email}"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 显示名称 -->
+                            <div class="mb-3">
+                                <label for="displayName" class="form-label">
+                                    <i class="fas fa-id-badge me-1"></i>显示名称
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="displayName" 
+                                       th:field="*{displayName}"
+                                       th:classappend="${#fields.hasErrors('displayName')} ? 'is-invalid' : ''"
+                                       placeholder="请输入显示名称（可选）">
+                                <div th:if="${#fields.hasErrors('displayName')}" class="invalid-feedback">
+                                    <span th:errors="*{displayName}"></span>
+                                </div>
+                                <div class="form-text">显示名称将在博客中展示，不填写则使用用户名</div>
+                            </div>
+
+                            <!-- 提交按钮 -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>保存资料
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 密码修改卡片 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-key me-2"></i>修改密码
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- 密码修改错误消息 -->
+                        <div th:if="${passwordErrorMessage}" class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span th:text="${passwordErrorMessage}"></span>
+                        </div>
+
+                        <form th:action="@{/change-password}" th:object="${passwordChange}" method="post">
+                            <!-- 当前密码 -->
+                            <div class="mb-3">
+                                <label for="currentPassword" class="form-label">
+                                    <i class="fas fa-lock me-1"></i>当前密码 <span class="text-danger">*</span>
+                                </label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="currentPassword" 
+                                       th:field="*{currentPassword}"
+                                       th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid' : ''"
+                                       placeholder="请输入当前密码">
+                                <div th:if="${#fields.hasErrors('currentPassword')}" class="invalid-feedback">
+                                    <span th:errors="*{currentPassword}"></span>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- 新密码 -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="newPassword" class="form-label">
+                                        <i class="fas fa-key me-1"></i>新密码 <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="password" 
+                                           class="form-control" 
+                                           id="newPassword" 
+                                           th:field="*{newPassword}"
+                                           th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid' : ''"
+                                           placeholder="请输入新密码">
+                                    <div th:if="${#fields.hasErrors('newPassword')}" class="invalid-feedback">
+                                        <span th:errors="*{newPassword}"></span>
+                                    </div>
+                                </div>
+
+                                <!-- 确认新密码 -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="confirmNewPassword" class="form-label">
+                                        <i class="fas fa-key me-1"></i>确认新密码 <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="password" 
+                                           class="form-control" 
+                                           id="confirmNewPassword" 
+                                           th:field="*{confirmNewPassword}"
+                                           th:classappend="${#fields.hasErrors('confirmNewPassword')} ? 'is-invalid' : ''"
+                                           placeholder="请再次输入新密码">
+                                    <div th:if="${#fields.hasErrors('confirmNewPassword')}" class="invalid-feedback">
+                                        <span th:errors="*{confirmNewPassword}"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 提交按钮 -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-key me-2"></i>修改密码
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // 密码匹配验证
+        document.addEventListener('DOMContentLoaded', function() {
+            const newPassword = document.getElementById('newPassword');
+            const confirmNewPassword = document.getElementById('confirmNewPassword');
+
+            function validatePasswordMatch() {
+                if (newPassword.value !== confirmNewPassword.value) {
+                    confirmNewPassword.setCustomValidity('新密码不匹配');
+                } else {
+                    confirmNewPassword.setCustomValidity('');
+                }
+            }
+
+            newPassword.addEventListener('input', validatePasswordMatch);
+            confirmNewPassword.addEventListener('input', validatePasswordMatch);
+
+            // 密码修改表单提交验证
+            const passwordForm = document.querySelector('form[action*="change-password"]');
+            passwordForm.addEventListener('submit', function(e) {
+                if (newPassword.value !== confirmNewPassword.value) {
+                    e.preventDefault();
+                    confirmNewPassword.classList.add('is-invalid');
+                    const feedback = confirmNewPassword.nextElementSibling;
+                    if (feedback && feedback.classList.contains('invalid-feedback')) {
+                        feedback.textContent = '新密码和确认密码不匹配';
+                    }
+                }
+            });
+        });
+    </script>
+
+</div>

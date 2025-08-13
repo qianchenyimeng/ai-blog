@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::head-content}, ~{::main-content})}">
+
+<head>
+    <title>我的评论 - 个人博客系统</title>
+    
+    <th:block th:fragment="head-content">
+        <style>
+            .comment-card {
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+            .comment-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            .comment-content {
+                background-color: #f8f9fa;
+                border-left: 4px solid #007bff;
+                padding: 1rem;
+                border-radius: 0.25rem;
+            }
+            .blog-link {
+                color: #007bff;
+                text-decoration: none;
+                font-weight: 500;
+            }
+            .blog-link:hover {
+                color: #0056b3;
+                text-decoration: underline;
+            }
+        </style>
+    </th:block>
+</head>
+
+<div th:fragment="main-content">
+    <!-- 页面标题和统计 -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <h2>
+                            <i class="fas fa-comments me-2"></i>我的评论
+                        </h2>
+                        <p class="text-muted">查看和管理您发表的所有评论</p>
+                    </div>
+            <div class="col-md-4 text-end">
+                <div class="card bg-info text-white">
+                    <div class="card-body py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-0" th:text="${totalElements}">0</h4>
+                                <small>条评论</small>
+                            </div>
+                            <i class="fas fa-comments fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- 评论列表 -->
+        <div th:if="${commentPage != null and commentPage.hasContent()}">
+            <div class="row">
+                <div class="col-12" th:each="comment : ${commentPage.content}">
+                    <div class="card comment-card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <!-- 评论头部信息 -->
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="mb-1">
+                                        评论于：
+                                        <a th:href="@{'/blog/' + ${comment.blog.id}}" 
+                                           class="blog-link"
+                                           th:text="${comment.blog.title}">博客标题</a>
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        <span th:text="${#temporals.format(comment.createdAt, 'yyyy年MM月dd日 HH:mm')}">发表时间</span>
+                                    </small>
+                                </div>
+                                <div>
+                                    <a th:href="@{'/blog/' + ${comment.blog.id}}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>查看博客
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- 评论内容 -->
+                            <div class="comment-content">
+                                <p class="mb-0" th:text="${comment.content}">评论内容</p>
+                            </div>
+
+                            <!-- 评论统计信息 -->
+                            <div class="mt-3 text-muted small">
+                                <i class="fas fa-user me-1"></i>
+                                作者：<span th:text="${comment.blog.author.displayName != null ? comment.blog.author.displayName : comment.blog.author.username}">博客作者</span>
+                                <span class="ms-3">
+                                    <i class="fas fa-eye me-1"></i>
+                                    浏览：<span th:text="${comment.blog.viewCount}">0</span>
+                                </span>
+                                <span class="ms-3">
+                                    <i class="fas fa-comments me-1"></i>
+                                    评论：<span th:text="${comment.blog.commentCount}">0</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分页导航 -->
+            <nav th:if="${totalPages > 1}" aria-label="评论分页" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <!-- 上一页 -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/my-comments(page=${currentPage - 1})}"
+                           th:if="${currentPage > 0}">
+                            <i class="fas fa-chevron-left"></i> 上一页
+                        </a>
+                        <span class="page-link" th:if="${currentPage == 0}">
+                            <i class="fas fa-chevron-left"></i> 上一页
+                        </span>
+                    </li>
+                    
+                    <!-- 页码 -->
+                    <li class="page-item" 
+                        th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:if="${pageNum >= currentPage - 2 and pageNum <= currentPage + 2}"
+                        th:classappend="${pageNum == currentPage} ? 'active'">
+                        <a class="page-link" 
+                           th:href="@{/my-comments(page=${pageNum})}"
+                           th:text="${pageNum + 1}">1</a>
+                    </li>
+                    
+                    <!-- 下一页 -->
+                    <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/my-comments(page=${currentPage + 1})}"
+                           th:if="${currentPage < totalPages - 1}">
+                            下一页 <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <span class="page-link" th:if="${currentPage >= totalPages - 1}">
+                            下一页 <i class="fas fa-chevron-right"></i>
+                        </span>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- 无评论提示 -->
+        <div th:if="${commentPage == null or !commentPage.hasContent()}" class="text-center py-5">
+            <i class="fas fa-comments fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted mb-3">还没有评论</h4>
+            <p class="text-muted mb-4">去博客文章下发表您的第一条评论吧</p>
+            <a th:href="@{/}" class="btn btn-primary">
+                <i class="fas fa-home me-2"></i>浏览博客
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 卡片悬停效果
+        document.querySelectorAll('.comment-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+
+</div>

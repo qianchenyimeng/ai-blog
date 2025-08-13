@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+
+<!-- 页脚片段 -->
+<footer th:fragment="footer" class="footer mt-auto bg-dark text-white">
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <h5 class="mb-3">
+                    <i class="fas fa-blog me-2"></i>个人博客系统
+                </h5>
+                <p class="mb-2">分享想法，记录生活，与世界连接</p>
+                <p class="text-muted small mb-0">
+                    基于 Spring Boot + Thymeleaf 构建的现代化博客系统
+                </p>
+            </div>
+            <div class="col-md-3 mb-3 mb-md-0">
+                <h6 class="mb-3">快速导航</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a th:href="@{/}" class="text-light text-decoration-none">
+                            <i class="fas fa-home me-2"></i>首页
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a th:href="@{/search}" class="text-light text-decoration-none">
+                            <i class="fas fa-search me-2"></i>搜索博客
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a th:href="@{/tags}" class="text-light text-decoration-none">
+                            <i class="fas fa-tags me-2"></i>标签云
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h6 class="mb-3">联系我们</h6>
+                <div class="d-flex flex-column">
+                    <small class="text-muted mb-2">
+                        <i class="fas fa-envelope me-2"></i>
+                        support@blog.com
+                    </small>
+                    <small class="text-muted mb-2">
+                        <i class="fas fa-globe me-2"></i>
+                        www.blog.com
+                    </small>
+                    <div class="mt-2">
+                        <a href="#" class="text-light me-3" title="GitHub">
+                            <i class="fab fa-github fa-lg"></i>
+                        </a>
+                        <a href="#" class="text-light me-3" title="Twitter">
+                            <i class="fab fa-twitter fa-lg"></i>
+                        </a>
+                        <a href="#" class="text-light" title="微博">
+                            <i class="fab fa-weibo fa-lg"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <hr class="my-4 border-secondary">
+        
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="mb-0 text-muted">
+                    <i class="fas fa-heart text-danger me-1"></i>
+                    &copy; 2024 个人博客系统 - 用心记录，用爱分享
+                </p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <small class="text-muted">
+                    Powered by Spring Boot & Bootstrap
+                </small>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</html>

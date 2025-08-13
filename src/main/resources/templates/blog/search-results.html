@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::head-content}, ~{::main-content})}">
+
+<head>
+    <title th:text="${searchQuery != null ? '搜索: ' + searchQuery : '博客搜索'} + ' - 个人博客系统'">博客搜索 - 个人博客系统</title>
+    
+    <th:block th:fragment="head-content">
+        <style>
+            .search-header {
+                background: linear-gradient(135deg, #007bff, #0056b3);
+                color: white;
+                padding: 2rem 0;
+                margin: -2rem -15px 2rem -15px;
+            }
+            .search-box {
+                max-width: 600px;
+                margin: 0 auto;
+            }
+            .search-stats {
+                background-color: #f8f9fa;
+                border-left: 4px solid #007bff;
+                padding: 1rem;
+                margin-bottom: 2rem;
+            }
+            .blog-card {
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+            .blog-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            .highlight {
+                background-color: #fff3cd;
+                padding: 0.1rem 0.2rem;
+                border-radius: 0.2rem;
+            }
+            .tag-cloud {
+                background-color: #f8f9fa;
+                border-radius: 0.5rem;
+                padding: 1rem;
+            }
+            .tag-item {
+                display: inline-block;
+                background-color: #007bff;
+                color: white;
+                padding: 0.25rem 0.75rem;
+                margin: 0.125rem;
+                border-radius: 1rem;
+                font-size: 0.875rem;
+                text-decoration: none;
+                transition: background-color 0.2s;
+            }
+            .tag-item:hover {
+                background-color: #0056b3;
+                color: white;
+            }
+        </style>
+    </th:block>
+</head>
+
+<div th:fragment="main-content">
+    <!-- 搜索头部 -->
+    <div class="search-header">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2>
+                    <i class="fas fa-search me-2"></i>博客搜索
+                </h2>
+                <p class="mb-0">发现感兴趣的内容</p>
+            </div>
+            
+            <!-- 搜索表单 -->
+            <div class="search-box">
+                <form th:action="@{/search}" method="get" class="d-flex">
+                    <div class="input-group">
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               name="q" 
+                               th:value="${keyword}"
+                               placeholder="输入关键词搜索博客..."
+                               autocomplete="off">
+                        <button class="btn btn-light btn-lg" type="submit">
+                            <i class="fas fa-search me-1"></i>搜索
+                        </button>
+                    </div>
+                </form>
+                <div class="text-center mt-2">
+                    <a th:href="@{/search/advanced}" class="text-light text-decoration-none">
+                        <i class="fas fa-cog me-1"></i>高级搜索
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 搜索统计信息 -->
+                <div class="search-stats" th:if="${searchQuery != null}">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-1">
+                                <i class="fas fa-info-circle me-2"></i>搜索结果
+                            </h5>
+                            <p class="mb-0">
+                                找到 <strong th:text="${totalElements}">0</strong> 篇关于
+                                <span class="badge bg-primary" th:text="${searchType}">关键词</span>
+                                "<strong th:text="${searchQuery}">搜索词</strong>" 的博客
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a th:href="@{/}" class="btn btn-outline-primary">
+                                <i class="fas fa-home me-1"></i>返回首页
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+        <!-- 无搜索条件提示 -->
+        <div class="search-stats" th:if="${searchQuery == null}">
+            <div class="text-center">
+                <h5 class="mb-1">
+                    <i class="fas fa-list me-2"></i>所有博客
+                </h5>
+                <p class="mb-0">
+                    共有 <strong th:text="${totalElements}">0</strong> 篇博客
+                </p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 主要内容区域 -->
+            <div class="col-lg-8">
+                <!-- 搜索结果列表 -->
+                <div th:if="${blogPage != null and blogPage.hasContent()}">
+                    <div class="row">
+                        <div class="col-12" th:each="blog : ${blogPage.content}">
+                            <div class="card blog-card mb-4 shadow-sm">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-9">
+                                            <!-- 博客标题 -->
+                                            <h5 class="card-title mb-2">
+                                                <a th:href="@{'/blog/' + ${blog.id}}" 
+                                                   class="text-decoration-none text-dark"
+                                                   th:text="${blog.title}">博客标题</a>
+                                            </h5>
+                                            
+                                            <!-- 博客摘要 -->
+                                            <p class="card-text text-muted mb-2" 
+                                               th:text="${blog.autoSummary}">博客摘要内容...</p>
+                                            
+                                            <!-- 标签 -->
+                                            <div class="mb-2" th:if="${blog.tags != null and !#strings.isEmpty(blog.tags)}">
+                                                <span th:each="tag : ${#strings.arraySplit(blog.tags, ',')}" 
+                                                      class="badge bg-secondary me-1">
+                                                    <a th:href="@{/search(tag=${#strings.trim(tag)})}" 
+                                                       class="text-white text-decoration-none"
+                                                       th:text="${#strings.trim(tag)}">标签</a>
+                                                </span>
+                                            </div>
+                                            
+                                            <!-- 博客信息 -->
+                                            <div class="d-flex align-items-center text-muted small">
+                                                <i class="fas fa-user me-1"></i>
+                                                <span th:text="${blog.author.displayName != null ? blog.author.displayName : blog.author.username}" class="me-3">作者</span>
+                                                
+                                                <i class="fas fa-calendar me-1"></i>
+                                                <span th:text="${#temporals.format(blog.createdAt, 'yyyy-MM-dd HH:mm')}" class="me-3">发布时间</span>
+                                                
+                                                <i class="fas fa-eye me-1"></i>
+                                                <span th:text="${blog.viewCount}" class="me-3">浏览量</span>
+                                                
+                                                <i class="fas fa-comments me-1"></i>
+                                                <span th:text="${blog.commentCount}">评论数</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-3 text-end">
+                                            <a th:href="@{'/blog/' + ${blog.id}}" 
+                                               class="btn btn-outline-primary">
+                                                <i class="fas fa-arrow-right me-1"></i>阅读全文
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 分页导航 -->
+                    <nav th:if="${totalPages > 1}" aria-label="搜索结果分页">
+                        <ul class="pagination justify-content-center">
+                            <!-- 上一页 -->
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/search(q=${keyword}, tag=${tag}, page=${currentPage - 1})}"
+                                   th:if="${currentPage > 0}">
+                                    <i class="fas fa-chevron-left"></i> 上一页
+                                </a>
+                                <span class="page-link" th:if="${currentPage == 0}">
+                                    <i class="fas fa-chevron-left"></i> 上一页
+                                </span>
+                            </li>
+                            
+                            <!-- 页码 -->
+                            <li class="page-item" 
+                                th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                                th:if="${pageNum >= currentPage - 2 and pageNum <= currentPage + 2}"
+                                th:classappend="${pageNum == currentPage} ? 'active'">
+                                <a class="page-link" 
+                                   th:href="@{/search(q=${keyword}, tag=${tag}, page=${pageNum})}"
+                                   th:text="${pageNum + 1}">1</a>
+                            </li>
+                            
+                            <!-- 下一页 -->
+                            <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/search(q=${keyword}, tag=${tag}, page=${currentPage + 1})}"
+                                   th:if="${currentPage < totalPages - 1}">
+                                    下一页 <i class="fas fa-chevron-right"></i>
+                                </a>
+                                <span class="page-link" th:if="${currentPage >= totalPages - 1}">
+                                    下一页 <i class="fas fa-chevron-right"></i>
+                                </span>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <!-- 无搜索结果提示 -->
+                <div th:if="${blogPage == null or !blogPage.hasContent()}" class="text-center py-5">
+                    <i class="fas fa-search fa-4x text-muted mb-4"></i>
+                    <h4 class="text-muted mb-3" th:text="${searchQuery != null ? '没有找到相关博客' : '还没有博客'}">没有找到相关博客</h4>
+                    <p class="text-muted mb-4" th:text="${searchQuery != null ? '尝试使用其他关键词或标签进行搜索' : '开始您的创作之旅'}">尝试使用其他关键词进行搜索</p>
+                    <div th:if="${searchQuery != null}">
+                        <a th:href="@{/search}" class="btn btn-primary me-2">
+                            <i class="fas fa-search me-2"></i>重新搜索
+                        </a>
+                        <a th:href="@{/}" class="btn btn-outline-primary">
+                            <i class="fas fa-home me-2"></i>返回首页
+                        </a>
+                    </div>
+                    <div th:if="${searchQuery == null}" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/blog/create}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>写第一篇博客
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 侧边栏 -->
+            <div class="col-lg-4">
+                <!-- 搜索提示 -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>搜索提示
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                使用关键词搜索标题和内容
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                点击标签进行分类搜索
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                支持中英文混合搜索
+                            </li>
+                            <li class="mb-0">
+                                <i class="fas fa-check text-success me-2"></i>
+                                搜索结果按时间排序
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 快速搜索 -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>快速搜索
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/search}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-list me-1"></i>所有博客
+                            </a>
+                            <a th:href="@{/search(tag='技术')}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-code me-1"></i>技术博客
+                            </a>
+                            <a th:href="@{/search(tag='生活')}" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-heart me-1"></i>生活随笔
+                            </a>
+                            <a th:href="@{/search(tag='学习')}" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-book me-1"></i>学习笔记
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <script>
+        // 搜索框自动聚焦
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[name="q"]');
+            if (searchInput && !searchInput.value) {
+                searchInput.focus();
+            }
+        });
+
+        // 搜索建议（可以后续扩展）
+        function showSearchSuggestions() {
+            // 实现搜索建议功能
+        }
+    </script>
+
+</div>

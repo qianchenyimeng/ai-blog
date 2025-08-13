@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>评论管理 - 个人博客系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .comment-item {
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
+            transition: all 0.2s;
+        }
+        .comment-item:hover {
+            background-color: #e9ecef;
+            border-left-color: #0056b3;
+        }
+        .comment-actions {
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .comment-item:hover .comment-actions {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="fas fa-blog me-2"></i>个人博客系统
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" th:href="@{/}">
+                    <i class="fas fa-home me-1"></i>首页
+                </a>
+                <a class="nav-link" th:href="@{/my-blogs}">
+                    <i class="fas fa-list me-1"></i>我的博客
+                </a>
+                <a class="nav-link" th:href="@{/blog/create}">
+                    <i class="fas fa-plus me-1"></i>写博客
+                </a>
+                <a class="nav-link" th:href="@{/profile}">
+                    <i class="fas fa-user me-1"></i>个人资料
+                </a>
+                <a class="nav-link" th:href="@{/logout}">
+                    <i class="fas fa-sign-out-alt me-1"></i>退出
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- 页面标题 -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>
+                    <i class="fas fa-cog me-2"></i>评论管理
+                </h2>
+                <p class="text-muted mb-0">管理您博客的所有评论</p>
+            </div>
+            <div>
+                <a th:href="@{'/blog/' + ${blogId}}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>返回博客
+                </a>
+            </div>
+        </div>
+
+        <!-- 成功消息 -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- 错误消息 -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- 评论统计 -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-1">
+                                    <i class="fas fa-comments me-2"></i>
+                                    <span th:text="${#lists.size(comments)}">0</span> 条评论
+                                </h4>
+                                <p class="mb-0">共有 <span th:text="${#lists.size(comments)}">0</span> 位读者参与了讨论</p>
+                            </div>
+                            <i class="fas fa-chart-bar fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 评论列表 -->
+        <div th:if="${comments != null and !comments.isEmpty()}">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>所有评论
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div th:each="comment, iterStat : ${comments}" 
+                         class="comment-item p-3"
+                         th:classappend="${!iterStat.last} ? 'border-bottom' : ''">
+                        
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <!-- 评论者信息 -->
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-user-circle fa-lg text-primary me-2"></i>
+                                    <div>
+                                        <strong th:text="${comment.displayName}">评论者</strong>
+                                        <small class="text-muted ms-2">
+                                            <i class="fas fa-clock me-1"></i>
+                                            <span th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">时间</span>
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <!-- 评论内容 -->
+                                <div class="comment-content">
+                                    <p class="mb-0" th:text="${comment.content}">评论内容</p>
+                                </div>
+                            </div>
+                            
+                            <!-- 操作按钮 -->
+                            <div class="comment-actions ms-3">
+                                <button type="button" 
+                                        class="btn btn-outline-danger btn-sm" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteCommentModal"
+                                        th:data-comment-id="${comment.id}"
+                                        th:data-comment-content="${#strings.abbreviate(comment.content, 50)}"
+                                        th:data-comment-author="${comment.displayName}">
+                                    <i class="fas fa-trash fa-sm me-1"></i>删除
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 无评论提示 -->
+        <div th:if="${comments == null or comments.isEmpty()}" class="text-center py-5">
+            <i class="fas fa-comments fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted mb-3">还没有评论</h4>
+            <p class="text-muted mb-4">这篇博客还没有收到任何评论</p>
+            <a th:href="@{'/blog/' + ${blogId}}" class="btn btn-primary">
+                <i class="fas fa-eye me-2"></i>查看博客
+            </a>
+        </div>
+    </div>
+
+    <!-- 删除评论确认模态框 -->
+    <div class="modal fade" id="deleteCommentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-danger me-2"></i>确认删除评论
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>您确定要删除这条评论吗？</p>
+                    <div class="alert alert-light">
+                        <strong>评论者：</strong><span id="deleteCommentAuthor"></span><br>
+                        <strong>内容：</strong><span id="deleteCommentContent"></span>
+                    </div>
+                    <p class="text-muted">此操作不可撤销。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <form id="deleteCommentForm" method="post" style="display: inline;">
+                        <input type="hidden" name="blogId" th:value="${blogId}">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>确认删除
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 删除评论模态框处理
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteCommentModal = document.getElementById('deleteCommentModal');
+            const deleteCommentForm = document.getElementById('deleteCommentForm');
+            const deleteCommentContent = document.getElementById('deleteCommentContent');
+            const deleteCommentAuthor = document.getElementById('deleteCommentAuthor');
+            
+            deleteCommentModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const commentId = button.getAttribute('data-comment-id');
+                const commentContent = button.getAttribute('data-comment-content');
+                const commentAuthor = button.getAttribute('data-comment-author');
+                
+                deleteCommentContent.textContent = commentContent;
+                deleteCommentAuthor.textContent = commentAuthor;
+                deleteCommentForm.action = '/comment/' + commentId + '/delete';
+            });
+        });
+    </script>
+</body>
+</html>
