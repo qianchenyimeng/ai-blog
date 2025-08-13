@@ -1,6 +1,7 @@
 # 个人博客系统
 
 一个基于Spring Boot开发的现代化个人博客系统，提供完整的博客管理、用户管理、评论系统等功能。
+
 项目是基于KIRO生成。项目导入idea后可直接运行。
 项目部分截图
 <img width="1920" height="959" alt="b001" src="https://github.com/user-attachments/assets/baf7cf49-3165-46f6-a9d4-769c7a9a1c71" />
